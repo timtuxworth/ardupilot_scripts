@@ -94,14 +94,14 @@ local function motors_emergency_stopped()
 end
 
 local function rtl_altitude_legal()
-    if (RTL_ALTITUDE != nil and RTL_ALTITUDE:get() > 120) then
+    if (RTL_ALTITUDE ~= nil and RTL_ALTITUDE:get() > 120) then
         return false
     end
     return true
 end
 
 local function rtl_climb()
-    if (RTL_CLIMB != nil and RTL_CLIMB:get() > 120) then
+    if (RTL_CLIMB ~= nil and RTL_CLIMB:get() > 120) then
         return false
     end
     return true
@@ -121,7 +121,7 @@ local arming_checks = {
     MotorsEstopped = Arming_Check(motors_emergency_stopped,
                             true, MAV_SEVERITY.ERROR, 
                             "Motors Emergency Stopped"
-                            )
+                            ),
     RTLClimbLegal = Arming_Check(rtl_climb_legal,
                             true, MAV_SEVERITY.ERROR, 
                             "RTL Climb too high"
