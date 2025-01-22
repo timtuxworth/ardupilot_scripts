@@ -13,19 +13,21 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-   Follow in Plane
-   Support follow "mode" in plane. This will actually use GUIDED mode with 
-   a scripting switch to allow guided to track the vehicle id in FOLL_SYSID
-   Uses the AP_Follow library so all of the existing FOLL_* parameters are used
-   as documented for Copter, + add 3 more for this script
-   ZPF_EXIT_MODE - the mode to switch to when follow is turned of using the switch
-   ZPF_FAIL_MODE - the mode to switch to if the target is lost
-   ZPF_TIMEOUT - number of seconds to try to reaquire the target after losing it before failing
-   ZPF_OVRSHT_DEG - if the target is more than this many degrees left or right, assume an overshoot
-   ZPR_TURN_DEG - if the target is more than this many degrees left or right, assume it's turning
+   Terrain follow in Copter
+   This script enables terrain following in copter. It's a bit of a hack. It works by fudging
+   the FOLL_OFS_Z value (without actually saving it). To get this to work set the following parameters:
+   SCR_ENABLE = 1
+   SCR_HEAP_SIZE = 300000
+   SCR_VM_I_COUNT = 200000
+   TERRAIN_ENABLE = 1
+   FOLL_ALT_TYPE = 3 (yes this is an invalid value - you will have to enter it manually, its not in the dropdown)
+   also set the FOLL_OFS values as you want them to be including 
+   FOLL_OFS_Z - e.g. if set to -5 will be 5 meters ABOVE the terrain height of the lead copter
+
+   The script will throw and error and not run if loaded on a copter or if TERRAIN_ENABLE = 0 or FOLL_ALT_TYPE != 3 
 --]]
 
-SCRIPT_VERSION = "4.7.0-001"
+SCRIPT_VERSION = "4.7.0-002"
 SCRIPT_NAME = "Copter Follow Terrain"
 SCRIPT_NAME_SHORT = "CFollTerr"
 
