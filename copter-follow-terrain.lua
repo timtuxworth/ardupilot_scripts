@@ -27,7 +27,7 @@
    The script will throw and error and not run if loaded on a copter or if TERRAIN_ENABLE = 0 or FOLL_ALT_TYPE != 3 
 --]]
 
-SCRIPT_VERSION = "4.7.0-002"
+SCRIPT_VERSION = "4.7.0-004"
 SCRIPT_NAME = "Copter Follow Terrain"
 SCRIPT_NAME_SHORT = "CFollTerr"
 
@@ -69,6 +69,8 @@ FOLL_ALT_TYPE = Parameter("FOLL_ALT_TYPE")
 local foll_alt_type = FOLL_ALT_TYPE:get() or 0
 FOLL_OFS_Z = Parameter("FOLL_OFS_Z")
 local foll_ofs_z = FOLL_OFS_Z:get() or 0
+local foll_ofs_z_set = foll_ofs_z
+
 
 local function calculate_ofs_z()
 
@@ -79,15 +81,18 @@ local function calculate_ofs_z()
     local target_terrain_height_m = terrain:height_amsl(target_location, true)
     local target_terrain_alt_m = target_location:alt() * .01 - target_terrain_height_m
     local current_terrain_height_m = terrain:height_amsl(current_location, true)
+
     if current_location ~= nil then
         current_location:change_alt_frame(ALT_FRAME.TERRAIN)
         local current_terrain_alt_m = current_location:alt() * .01
 
-        local new_foll_ofs_z = -(target_terrain_alt_m - current_terrain_alt_m - foll_ofs_z)
+        -- foll_ofs_z positive is below the lead/target, negative is above
+        --                        -10 - (10 - 15)
+        local new_foll_ofs_z = (foll_ofs_z_set - (target_terrain_alt_m - current_terrain_alt_m))
         if (now - now_display) > 5 then
-            gcs:send_text(MAV_SEVERITY.NOTICE, string.format("alt target %.0f current %.0f foll_ofs_z %.0f new %.0f",
-                                                            target_terrain_alt_m, current_terrain_alt_m,
-                                                            foll_ofs_z, new_foll_ofs_z
+            gcs:send_text(MAV_SEVERITY.NOTICE, string.format("alt target %.0f current %.0f current %.0f foll_ofs_z %.0f new %.0f",
+                                                            target_terrain_alt_m, current_terrain_alt_m, current_terrain_height_m,
+                                                            foll_ofs_z_set, new_foll_ofs_z
                                                         ))
             now_display = now
         end
@@ -99,7 +104,8 @@ end
 local function update()
     now = millis():tofloat() * 0.001
     mode = vehicle:get_mode()
-    foll_alt_type = FOLL_ALT_TYPE:get() or 0
+    foll_alt_type = FOLL_ALT_TYPE:get() or 1
+    -- foll_ofs_z = FOLL_OFS_Z:get() or 0
 
     if mode == FLIGHT_MODE.FOLLOW and follow:have_target() and foll_alt_type == 3 then
         calculate_ofs_z()
